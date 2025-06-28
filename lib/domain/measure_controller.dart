@@ -1,32 +1,39 @@
+import 'dart:io';
+
+import 'package:excel/excel.dart';
+import 'package:file_provider/file_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:valve_heights_app/domain/measure_group.dart';
 import 'package:valve_heights_app/domain/measure_point.dart';
 import 'package:valve_heights_app/domain/measure_sequence.dart';
 
-const reportStartPoint = Offset(4, 7);
+const reportStartPoint = Offset(3, 6);
 
 class MeasureController extends ChangeNotifier {
   Map<String, double> values = {};
   Map<String, FocusNode> nodes = {};
+  Map<String, Offset> exportPositions = {};
 
   bool showKeyboard = false;
 
   MeasureGroup root = MeasureGroup(
     ids: ['A', 'B'],
     resultPosition: reportStartPoint,
-    step: 6,
+    step: 8,
 
     subGroup: MeasureGroup(
       ids: ['1', '2', '3', '4', '5', '6'],
       iterationRule: IterationRule.iterateY,
-      step: 1,
+      step: 4,
       resultPosition: reportStartPoint,
       subGroup: MeasureGroup(
         points: {
           'stem': MeasurePoint(name: 'stem', offsetFromParent: Offset(0, 0)),
           'rotator': MeasurePoint(
             name: 'rotator',
-            offsetFromParent: Offset(0, 0),
+            offsetFromParent: Offset(1, 0),
           ),
         },
         ids: ['A', 'B', 'C', 'D'],
@@ -66,12 +73,16 @@ class MeasureController extends ChangeNotifier {
     ),
   );
 
-  setupNodes({required String path, required FocusNode node}) {
+  setNode({required String path, required FocusNode node}) {
     nodes[path] = node;
   }
 
   void setValue({required double value, required String path}) {
     values[path] = value;
+  }
+
+  setExportPosition({required String path, required Offset position}) {
+    exportPositions[path] = position;
   }
 
   setNodeInSequence(String currentPath) {
@@ -83,12 +94,57 @@ class MeasureController extends ChangeNotifier {
 
   FocusNode getNextNode({required String currentPath}) {
     final nextPath = sequence.generateNextPath();
-    // print(nextPath);
-    return nodes[nextPath]!;
+    final node = nodes[nextPath];
+    if (node == null) throw Exception("Path does not exist");
+    return node;
   }
 
   void toggleShowKeyboard() {
     showKeyboard = !showKeyboard;
     notifyListeners();
+  }
+
+  void exportReport(BuildContext context) async {
+    final data = await rootBundle.load('assets/template.xlsx');
+    final bytes = data.buffer.asUint8List(
+      data.offsetInBytes,
+      data.lengthInBytes,
+    );
+    final excel = Excel.decodeBytes(bytes);
+    final table = excel.tables["Sheet1"];
+    if (table == null) return;
+
+    for (final k in values.keys) {
+      final val = values[k];
+      final pos = exportPositions[k];
+      if (val == null || pos == null) continue;
+      // print("$k $val $pos");
+      var cell = table.cell(
+        CellIndex.indexByColumnRow(
+          columnIndex: pos.dx.round(),
+          rowIndex: pos.dy.round(),
+        ),
+      );
+      final stemStyle = cell.cellStyle;
+      cell.value = DoubleCellValue(val);
+      cell.cellStyle = stemStyle;
+    }
+
+    if (kIsWeb) {
+      excel.save(fileName: "measurement.xlsx");
+    } else {
+      final fileBytes = excel.save();
+      if (fileBytes == null) return;
+      final IFileProvider fileProvider = FileProvider.getInstance();
+      final file = await fileProvider.selectFile(
+        context: context,
+        title: "Select output file",
+        allowedExtensions: ["xlsx"],
+      );
+      String path = file.path.split(".")[0];
+      File("$path.xlsx")
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(fileBytes);
+    }
   }
 }

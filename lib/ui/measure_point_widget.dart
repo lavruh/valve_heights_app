@@ -19,7 +19,6 @@ class MeasurePointWidget extends StatefulWidget {
 
 class _MeasurePointWidgetState extends State<MeasurePointWidget> {
   TextEditingController textController = TextEditingController();
-  String oldValue = '';
 
   final node = FocusNode();
 
@@ -46,9 +45,10 @@ class _MeasurePointWidgetState extends State<MeasurePointWidget> {
   @override
   Widget build(BuildContext context) {
     final path = '${widget.rootPath}.${widget.point.name}';
-    // oldValue = textController.text;
-
-    widget.controller.setupNodes(path: path, node: node);
+    final exportPos =
+        widget.point.exportPosition! + widget.point.offsetFromParent;
+    widget.controller.setNode(path: path, node: node);
+    widget.controller.setExportPosition(path: path, position: exportPos);
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: SizedBox(
@@ -64,7 +64,7 @@ class _MeasurePointWidgetState extends State<MeasurePointWidget> {
           onSubmitted: (v) {
             final d = double.tryParse(v);
             if (d != null) {
-              widget.controller.setValue(value: d, path: path);
+              widget.controller.setValue(path: path, value: d);
               final nextNode = widget.controller.getNextNode(currentPath: path);
               FocusScope.of(context).requestFocus(nextNode);
             }

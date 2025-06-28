@@ -8,21 +8,33 @@ class MeasureGroupWidget extends StatelessWidget {
     super.key,
     required this.group,
     this.rootPath,
+    required this.exportPosition,
     required this.controller,
   });
 
   final MeasureGroup group;
   final String? rootPath;
   final MeasureController controller;
+  final Offset exportPosition;
 
   @override
   Widget build(BuildContext context) {
     final subGroup = group.subGroup;
     final points = group.points.values;
-
+    final startX = exportPosition.dx;
+    final startY = exportPosition.dy;
+    int i = 0;
     final children = [
       ...group.ids.map((e) {
         final path = rootPath == null ? e : '$rootPath.$e';
+        final step = group.step;
+        Offset exportPosition = Offset(startX, startY);
+        if (group.iterationRule == IterationRule.iterateY) {
+          exportPosition = Offset(startX, startY + step * i);
+        } else {
+          exportPosition = Offset(startX + step * i, startY);
+        }
+        i++;
         return Card(
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -33,16 +45,17 @@ class MeasureGroupWidget extends StatelessWidget {
                 MeasureGroupWidget(
                   group: subGroup,
                   rootPath: path,
+                  exportPosition: exportPosition,
                   controller: controller,
                 ),
               if (points.isNotEmpty)
-                ...points.map(
-                  (p) => MeasurePointWidget(
-                    point: p,
+                ...points.map((p) {
+                  return MeasurePointWidget(
+                    point: p.copyWith(exportPosition: exportPosition),
                     rootPath: path,
                     controller: controller,
-                  ),
-                ),
+                  );
+                }),
             ],
           ),
         );

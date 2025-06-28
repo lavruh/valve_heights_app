@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'measure_point.dart';
 
 class MeasureGroup {

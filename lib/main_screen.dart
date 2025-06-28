@@ -10,7 +10,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final controller = MeasureController();
+  MeasureController controller = MeasureController();
 
   @override
   void initState() {
@@ -24,12 +24,24 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Valve heights')),
-      body: ValveHeightsInputWidget(controller: controller),
-      floatingActionButton: FloatingActionButton(
-        child:  Icon(controller.showKeyboard ? Icons.keyboard_hide : Icons.keyboard_alt),
-        onPressed: () => controller.toggleShowKeyboard(),
+      appBar: AppBar(
+        title: Text('Valve heights'),
+        actions: [
+          IconButton(
+            onPressed: () => controller.exportReport(context),
+            icon: Icon(Icons.download),
+          ),
+          IconButton(
+            icon: Icon(
+              controller.showKeyboard
+                  ? Icons.keyboard_hide
+                  : Icons.keyboard_alt,
+            ),
+            onPressed: () => controller.toggleShowKeyboard(),
+          ),
+        ],
       ),
+      body: ValveHeightsInputWidget(controller: controller),
     );
   }
 
