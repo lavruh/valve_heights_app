@@ -22,3 +22,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/template.xlsx
+    - assets/configs/PS_ME_abcd_stem_rotator.json
+    - assets/configs/PS_ME_dcab_stem_rotator.json
+    - assets/configs/PS_ME_stem_rotator_abcd.json
+    - assets/configs/PS_ME_stem_rotator_dcab.json
+    - assets/configs/SB_ME_abcd_stem_rotator.json
+    - assets/configs/SB_ME_dcab_stem_rotator.json
+    - assets/configs/SB_ME_stem_rotator_abcd.json
+    - assets/configs/SB_ME_stem_rotator_dcab.json
