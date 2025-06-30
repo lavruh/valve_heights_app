@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
@@ -18,60 +19,70 @@ class MeasureController extends ChangeNotifier {
 
   bool showKeyboard = false;
 
-  MeasureGroup root = MeasureGroup(
-    ids: ['A', 'B'],
-    resultPosition: reportStartPoint,
-    step: 8,
+  MeasureController({MeasureGroup? root, MeasureSequence? sequence})
+    : root =
+          root ??
+          MeasureGroup(
+            ids: ['A', 'B'],
+            resultPosition: reportStartPoint,
+            step: 8,
 
-    subGroup: MeasureGroup(
-      ids: ['1', '2', '3', '4', '5', '6'],
-      iterationRule: IterationRule.iterateY,
-      step: 4,
-      resultPosition: reportStartPoint,
-      subGroup: MeasureGroup(
-        points: {
-          'stem': MeasurePoint(name: 'stem', offsetFromParent: Offset(0, 0)),
-          'rotator': MeasurePoint(
-            name: 'rotator',
-            offsetFromParent: Offset(1, 0),
+            subGroup: MeasureGroup(
+              ids: ['1', '2', '3', '4', '5', '6'],
+              iterationRule: IterationRule.iterateY,
+              step: 4,
+              resultPosition: reportStartPoint,
+              subGroup: MeasureGroup(
+                points: {
+                  'stem': MeasurePoint(
+                    name: 'stem',
+                    offsetFromParent: Offset(0, 0),
+                  ),
+                  'rotator': MeasurePoint(
+                    name: 'rotator',
+                    offsetFromParent: Offset(1, 0),
+                  ),
+                },
+                ids: ['A', 'B', 'C', 'D'],
+                resultPosition: reportStartPoint,
+                iterationRule: IterationRule.iterateY,
+                step: 1,
+              ),
+            ),
           ),
-        },
-        ids: ['A', 'B', 'C', 'D'],
-        resultPosition: reportStartPoint,
-        iterationRule: IterationRule.iterateY,
-        step: 1,
-      ),
-    ),
-  );
+      sequence =
+          sequence ??
+          MeasureSequence(
+            sequence: [
+              "A.1",
+              "B.1",
+              "A.5",
+              "B.5",
+              "A.3",
+              "B.3",
+              "A.6",
+              "B.6",
+              "A.2",
+              "B.2",
+              "A.4",
+              "B.4",
+            ],
+            subSequence: MeasureSequence(
+              sequence: [
+                "D.stem",
+                "C.stem",
+                "A.stem",
+                "B.stem",
+                "D.rotator",
+                "C.rotator",
+                "A.rotator",
+                "B.rotator",
+              ],
+            ),
+          );
 
-  MeasureSequence sequence = MeasureSequence(
-    sequence: [
-      "A.1",
-      "B.1",
-      "A.5",
-      "B.5",
-      "A.3",
-      "B.3",
-      "A.6",
-      "B.6",
-      "A.2",
-      "B.2",
-      "A.4",
-      "B.4",
-    ],
-    subSequence: MeasureSequence(
-      sequence: [
-        "D.stem",
-        "C.stem",
-        "A.stem",
-        "B.stem",
-        "D.rotator",
-        "C.rotator",
-        "A.rotator",
-        "B.rotator",
-      ],
-    ),
-  );
+  late MeasureGroup root;
+  late MeasureSequence sequence;
 
   setNode({required String path, required FocusNode node}) {
     nodes[path] = node;
@@ -146,5 +157,46 @@ class MeasureController extends ChangeNotifier {
         ..createSync(recursive: true)
         ..writeAsBytesSync(fileBytes);
     }
+  }
+
+  Map<String, dynamic> toMap() {
+    return {"root": root.toMap(), "sequence": sequence.toMap()};
+  }
+
+  factory MeasureController.fromMap(Map<String, dynamic> map) {
+    return MeasureController(
+      root: MeasureGroup.fromMap(map["root"]),
+      sequence: MeasureSequence.fromMap(map["sequence"]),
+    );
+  }
+
+  String toJson() {
+    return jsonEncode(toMap());
+  }
+
+  factory MeasureController.fromJson(String source) {
+    return MeasureController.fromMap(jsonDecode(source));
+  }
+
+Future<void> saveConfigFile(BuildContext context) async {
+  final String jsonContent = toJson();
+  final IFileProvider fileProvider = FileProvider.getInstance();
+  final file = await fileProvider.selectFile(
+    context: context,
+    title: "Select location to save config",
+    allowedExtensions: ["json"],
+  );
+  String path = file.path.split(".")[0];
+  File("$path.json")
+    ..createSync(recursive: true)
+    ..writeAsStringSync(jsonContent);
+}
+
+  @override
+  void dispose() {
+    super.dispose();
+    nodes.clear();
+    values.clear();
+    exportPositions.clear();
   }
 }

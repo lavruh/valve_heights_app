@@ -53,4 +53,23 @@ class MeasureSequence {
   }
 
   _setNextIndex() => currentIndex = (currentIndex + 1) % sequence.length;
+
+  @override
+  String toString() => toMap().toString();
+
+  Map<String, dynamic> toMap() {
+    return {
+      'subSequence': subSequence?.toMap(),
+      'sequence': sequence,
+      'currentIndex': currentIndex,
+    };
+  }
+
+  factory MeasureSequence.fromMap(Map<String, dynamic> map) {
+    return MeasureSequence(
+      subSequence: map['subSequence'] != null ? MeasureSequence.fromMap(map['subSequence']) : null,
+      sequence: List<String>.from(map['sequence']),
+      currentId: map['sequence'][map['currentIndex']],
+    );
+  }
 }

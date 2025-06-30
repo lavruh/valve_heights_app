@@ -4,21 +4,13 @@ class MeasurePoint {
   final String name;
   final Offset offsetFromParent;
   final Offset? exportPosition;
-  final FocusNode? node;
-  final double? value;
 
   MeasurePoint({
     required this.name,
     required this.offsetFromParent,
     this.exportPosition,
-    this.node,
-    this.value,
   });
 
-  @override
-  String toString() {
-    return '$name: value $value > $exportPosition \n';
-  }
 
   MeasurePoint copyWith({
     String? name,
@@ -31,8 +23,32 @@ class MeasurePoint {
       name: name ?? this.name,
       offsetFromParent: offsetFromParent ?? this.offsetFromParent,
       exportPosition: exportPosition ?? this.exportPosition,
-      node: node ?? this.node,
-      value: value,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'offsetFromParent': '${offsetFromParent.dx.toStringAsFixed(1)},${offsetFromParent.dy.toStringAsFixed(1)}',
+      'exportPosition': exportPosition == null
+        ? null
+        : '${exportPosition!.dx.toStringAsFixed(1)},${exportPosition!.dy.toStringAsFixed(1)}',
+    };
+  }
+
+  factory MeasurePoint.fromMap(Map<String, dynamic> map) {
+    return MeasurePoint(
+      name: map['name'],
+      offsetFromParent: Offset(
+        double.parse(map['offsetFromParent'].split(',')[0]),
+        double.parse(map['offsetFromParent'].split(',')[1]),
+      ),
+      exportPosition: map['exportPosition'] == null
+        ? null
+        : Offset(
+          double.parse(map['exportPosition'].split(',')[0]),
+          double.parse(map['exportPosition'].split(',')[1]),
+        ),
     );
   }
 }
