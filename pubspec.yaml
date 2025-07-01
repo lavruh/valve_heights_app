@@ -2,7 +2,7 @@ name: valve_heights_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.2+1
+version: 1.0.3+1
 
 environment:
   sdk: ^3.8.0
@@ -13,6 +13,9 @@ dependencies:
     git: https://github.com/lavruh/file_provider.git
   csv: ^6.0.0
   excel: ^4.0.6
+  shared_preferences: ^2.5.3
+  path: ^1.9.1
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

@@ -17,69 +17,73 @@ class MeasureController extends ChangeNotifier {
   Map<String, FocusNode> nodes = {};
   Map<String, Offset> exportPositions = {};
 
-  bool showKeyboard = false;
+  bool showKeyboard = true;
 
-  MeasureController({MeasureGroup? root, MeasureSequence? sequence})
-    : root =
-          root ??
-          MeasureGroup(
-            ids: ['A', 'B'],
-            resultPosition: reportStartPoint,
-            step: 8,
+  MeasureController({
+    MeasureGroup? root,
+    MeasureSequence? sequence,
+    Map<String, double>? values,
+  }) : root =
+           root ??
+           MeasureGroup(
+             ids: ['A', 'B'],
+             resultPosition: reportStartPoint,
+             step: 8,
 
-            subGroup: MeasureGroup(
-              ids: ['1', '2', '3', '4', '5', '6'],
-              iterationRule: IterationRule.iterateY,
-              step: 4,
-              resultPosition: reportStartPoint,
-              subGroup: MeasureGroup(
-                points: {
-                  'stem': MeasurePoint(
-                    name: 'stem',
-                    offsetFromParent: Offset(0, 0),
-                  ),
-                  'rotator': MeasurePoint(
-                    name: 'rotator',
-                    offsetFromParent: Offset(1, 0),
-                  ),
-                },
-                ids: ['A', 'B', 'C', 'D'],
-                resultPosition: reportStartPoint,
-                iterationRule: IterationRule.iterateY,
-                step: 1,
-              ),
-            ),
-          ),
-      sequence =
-          sequence ??
-          MeasureSequence(
-            sequence: [
-              "A.1",
-              "B.1",
-              "A.5",
-              "B.5",
-              "A.3",
-              "B.3",
-              "A.6",
-              "B.6",
-              "A.2",
-              "B.2",
-              "A.4",
-              "B.4",
-            ],
-            subSequence: MeasureSequence(
-              sequence: [
-                "D.stem",
-                "C.stem",
-                "A.stem",
-                "B.stem",
-                "D.rotator",
-                "C.rotator",
-                "A.rotator",
-                "B.rotator",
-              ],
-            ),
-          );
+             subGroup: MeasureGroup(
+               ids: ['1', '2', '3', '4', '5', '6'],
+               iterationRule: IterationRule.iterateY,
+               step: 4,
+               resultPosition: reportStartPoint,
+               subGroup: MeasureGroup(
+                 points: {
+                   'stem': MeasurePoint(
+                     name: 'stem',
+                     offsetFromParent: Offset(0, 0),
+                   ),
+                   'rotator': MeasurePoint(
+                     name: 'rotator',
+                     offsetFromParent: Offset(1, 0),
+                   ),
+                 },
+                 ids: ['A', 'B', 'C', 'D'],
+                 resultPosition: reportStartPoint,
+                 iterationRule: IterationRule.iterateY,
+                 step: 1,
+               ),
+             ),
+           ),
+       sequence =
+           sequence ??
+           MeasureSequence(
+             sequence: [
+               "A.1",
+               "B.1",
+               "A.5",
+               "B.5",
+               "A.3",
+               "B.3",
+               "A.6",
+               "B.6",
+               "A.2",
+               "B.2",
+               "A.4",
+               "B.4",
+             ],
+             subSequence: MeasureSequence(
+               sequence: [
+                 "D.stem",
+                 "C.stem",
+                 "A.stem",
+                 "B.stem",
+                 "D.rotator",
+                 "C.rotator",
+                 "A.rotator",
+                 "B.rotator",
+               ],
+             ),
+           ),
+       values = values ?? {};
 
   late MeasureGroup root;
   late MeasureSequence sequence;
@@ -147,15 +151,17 @@ class MeasureController extends ChangeNotifier {
       final fileBytes = excel.save();
       if (fileBytes == null) return;
       final IFileProvider fileProvider = FileProvider.getInstance();
-      final file = await fileProvider.selectFile(
-        context: context,
-        title: "Select output file",
-        allowedExtensions: ["xlsx"],
-      );
-      String path = file.path.split(".")[0];
-      File("$path.xlsx")
-        ..createSync(recursive: true)
-        ..writeAsBytesSync(fileBytes);
+      if (context.mounted) {
+        final file = await fileProvider.selectFile(
+          context: context,
+          title: "Select output file",
+          allowedExtensions: ["xlsx"],
+        );
+        String path = file.path.split(".")[0];
+        File("$path.xlsx")
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(fileBytes);
+      }
     }
   }
 
@@ -178,19 +184,19 @@ class MeasureController extends ChangeNotifier {
     return MeasureController.fromMap(jsonDecode(source));
   }
 
-Future<void> saveConfigFile(BuildContext context) async {
-  final String jsonContent = toJson();
-  final IFileProvider fileProvider = FileProvider.getInstance();
-  final file = await fileProvider.selectFile(
-    context: context,
-    title: "Select location to save config",
-    allowedExtensions: ["json"],
-  );
-  String path = file.path.split(".")[0];
-  File("$path.json")
-    ..createSync(recursive: true)
-    ..writeAsStringSync(jsonContent);
-}
+  Future<void> saveConfigFile(BuildContext context) async {
+    final String jsonContent = toJson();
+    final IFileProvider fileProvider = FileProvider.getInstance();
+    final file = await fileProvider.selectFile(
+      context: context,
+      title: "Select location to save config",
+      allowedExtensions: ["json"],
+    );
+    String path = file.path.split(".")[0];
+    File("$path.json")
+      ..createSync(recursive: true)
+      ..writeAsStringSync(jsonContent);
+  }
 
   @override
   void dispose() {

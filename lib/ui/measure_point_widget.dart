@@ -25,6 +25,7 @@ class _MeasurePointWidgetState extends State<MeasurePointWidget> {
   @override
   void initState() {
     super.initState();
+    setValue();
     node.addListener(() {
       if (node.hasFocus) {
         textController.selection = TextSelection(
@@ -33,6 +34,19 @@ class _MeasurePointWidgetState extends State<MeasurePointWidget> {
         );
       }
     });
+  }
+
+  void setValue() {
+    if (widget.controller.values.containsKey(
+      '${widget.rootPath}.${widget.point.name}',
+    )) {
+      textController.text = widget
+          .controller
+          .values['${widget.rootPath}.${widget.point.name}']
+          .toString();
+    } else {
+      textController.text = "";
+    }
   }
 
   @override
@@ -45,6 +59,7 @@ class _MeasurePointWidgetState extends State<MeasurePointWidget> {
   @override
   Widget build(BuildContext context) {
     final path = '${widget.rootPath}.${widget.point.name}';
+    setValue();
     final exportPos =
         widget.point.exportPosition! + widget.point.offsetFromParent;
     widget.controller.setNode(path: path, node: node);
