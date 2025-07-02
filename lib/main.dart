@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:valve_heights_app/main_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (await handlePermissions()) runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -106,4 +108,12 @@ class MyApp extends StatelessWidget {
 
     return files;
   }
+}
+
+Future<bool> handlePermissions() async {
+  if (Platform.isWindows || Platform.isLinux) return true;
+  if (await Permission.manageExternalStorage.status.isDenied) {
+    await Permission.manageExternalStorage.request().isGranted;
+  }
+  return true;
 }
