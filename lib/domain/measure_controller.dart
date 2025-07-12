@@ -6,6 +6,7 @@ import 'package:file_provider/file_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:valve_heights_app/domain/measure_group.dart';
 import 'package:valve_heights_app/domain/measure_point.dart';
 import 'package:valve_heights_app/domain/measure_sequence.dart';
@@ -119,7 +120,7 @@ class MeasureController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void exportReport(BuildContext context) async {
+  void exportReport() async {
     final data = await rootBundle.load('assets/template.xlsx');
     final bytes = data.buffer.asUint8List(
       data.offsetInBytes,
@@ -133,7 +134,6 @@ class MeasureController extends ChangeNotifier {
       final val = values[k];
       final pos = exportPositions[k];
       if (val == null || pos == null) continue;
-      // print("$k $val $pos");
       var cell = table.cell(
         CellIndex.indexByColumnRow(
           columnIndex: pos.dx.round(),
@@ -151,17 +151,12 @@ class MeasureController extends ChangeNotifier {
       final fileBytes = excel.save();
       if (fileBytes == null) return;
       final IFileProvider fileProvider = FileProvider.getInstance();
-      if (context.mounted) {
-        final file = await fileProvider.selectFile(
-          context: context,
-          title: "Select output file",
-          allowedExtensions: ["xlsx"],
-        );
-        String path = file.path.split(".")[0];
-        File("$path.xlsx")
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(fileBytes);
-      }
+      final dateString = DateFormat("yyyy-MM-dd").format(DateTime.now());
+      fileProvider.saveDataToFile(
+        data: Uint8List.fromList(fileBytes),
+        fileName: "$dateString export.xlsx",
+        allowedExtensions: [".xlsx"],
+      );
     }
   }
 

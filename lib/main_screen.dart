@@ -82,7 +82,7 @@ class _MainScreenState extends State<MainScreen> {
           IconButton(
             icon: Icon(Icons.exit_to_app),
             tooltip: "Generate report",
-            onPressed: () => controller.exportReport(context),
+            onPressed: () => controller.exportReport(),
           ),
           IconButton(
             tooltip: "Show keyboard",

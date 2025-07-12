@@ -2,7 +2,7 @@ name: valve_heights_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.4+1
+version: 1.0.5+1
 
 environment:
   sdk: ^3.8.0
@@ -18,6 +18,7 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^12.0.0+1
   build_runner: ^2.5.4
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
