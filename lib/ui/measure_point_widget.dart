@@ -80,8 +80,16 @@ class _MeasurePointWidgetState extends State<MeasurePointWidget> {
             final d = double.tryParse(v);
             if (d != null) {
               widget.controller.setValue(path: path, value: d);
-              final nextNode = widget.controller.getNextNode(currentPath: path);
-              FocusScope.of(context).requestFocus(nextNode);
+              try {
+                final nextNode = widget.controller.getNextNode(
+                  currentPath: path,
+                );
+                FocusScope.of(context).requestFocus(nextNode);
+              } on MeasureControllerException catch (e) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(e.message)));
+              }
             }
           },
         ),

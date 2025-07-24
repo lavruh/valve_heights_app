@@ -24,9 +24,7 @@ class _MainScreenState extends State<MainScreen> {
     confDir = Directory(widget.pathConfigs);
     _configPath = confDir.listSync().first.path;
     super.initState();
-    controller.addListener(() {
-      setState(() {});
-    });
+    controller.addListener(() => setState(() {}));
   }
 
   Future<void> loadController(BuildContext context) async {
@@ -50,7 +48,11 @@ class _MainScreenState extends State<MainScreen> {
   _configFromJson(String jsonContent) {
     setState(() {
       final oldValues = controller.values;
+      final showKeyboardState = controller.showKeyboard;
+      controller.dispose();
       controller = MeasureController.fromJson(jsonContent);
+      controller.addListener(() => setState(() {}));
+      controller.showKeyboard = showKeyboardState;
       if (oldValues.isNotEmpty) {
         controller.values.addAll(oldValues);
       }
@@ -75,9 +77,9 @@ class _MainScreenState extends State<MainScreen> {
             : null,
         actions: [
           IconButton(
-            icon: Icon(Icons.file_upload),
-            onPressed: () => loadController(context),
-            tooltip: "Load config",
+            icon: Icon(Icons.clear_all),
+            onPressed: () => newMeasurement(context),
+            tooltip: "New measurement",
           ),
           IconButton(
             icon: Icon(Icons.exit_to_app),
@@ -116,5 +118,28 @@ class _MainScreenState extends State<MainScreen> {
     _configPath = value;
     final jsonContent = getConfigJson(value);
     _configFromJson(jsonContent);
+  }
+
+  Future<void> newMeasurement(BuildContext context) async {
+    final shouldClear = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('New Measurement'),
+        content: const Text('Clear all recorded data?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('CLEAR'),
+          ),
+        ],
+      ),
+    );
+    if (shouldClear == true) {
+      controller.clearState();
+    }
   }
 }

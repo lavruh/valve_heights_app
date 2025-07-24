@@ -47,8 +47,6 @@ class MyApp extends StatelessWidget {
 
   Future<String> init() async {
     final prefs = await SharedPreferences.getInstance();
-    // prefs.setString('pathConfigs', '');
-    await prefs.clear();
     String? pathConfigs = prefs.getString('pathConfigs');
     pathConfigs ??= await setupConfigDirectory(pathConfigs, prefs);
     if (pathConfigs == null) {

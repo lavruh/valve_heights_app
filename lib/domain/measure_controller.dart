@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:valve_heights_app/domain/measure_group.dart';
 import 'package:valve_heights_app/domain/measure_point.dart';
 import 'package:valve_heights_app/domain/measure_sequence.dart';
@@ -19,11 +20,13 @@ class MeasureController extends ChangeNotifier {
   Map<String, Offset> exportPositions = {};
 
   bool showKeyboard = true;
+  SharedPreferences? prefs;
 
   MeasureController({
     MeasureGroup? root,
     MeasureSequence? sequence,
     Map<String, double>? values,
+    this.prefs,
   }) : root =
            root ??
            MeasureGroup(
@@ -84,7 +87,9 @@ class MeasureController extends ChangeNotifier {
                ],
              ),
            ),
-       values = values ?? {};
+       values = values ?? {} {
+    _init();
+  }
 
   late MeasureGroup root;
   late MeasureSequence sequence;
@@ -95,6 +100,7 @@ class MeasureController extends ChangeNotifier {
 
   void setValue({required double value, required String path}) {
     values[path] = value;
+    saveState();
   }
 
   setExportPosition({required String path, required Offset position}) {
@@ -111,7 +117,7 @@ class MeasureController extends ChangeNotifier {
   FocusNode getNextNode({required String currentPath}) {
     final nextPath = sequence.generateNextPath();
     final node = nodes[nextPath];
-    if (node == null) throw Exception("Path does not exist");
+    if (node == null) throw MeasureControllerException("Path does not exist");
     return node;
   }
 
@@ -200,4 +206,48 @@ class MeasureController extends ChangeNotifier {
     values.clear();
     exportPositions.clear();
   }
+
+  void saveState() async {
+    final json = jsonEncode(values);
+    await prefs?.setString("values", json);
+  }
+
+  void loadState() async {
+    final jsonString = prefs?.getString("values");
+    if (jsonString != null) {
+      try {
+        final Map<String, dynamic> decoded = jsonDecode(jsonString);
+        decoded.forEach((key, value) {
+          if (value is num) {
+            values[key] = value.toDouble();
+          } else if (value is String) {
+            values[key] = double.tryParse(value) ?? 0.0;
+          }
+        });
+        notifyListeners();
+      } catch (e) {
+        MeasureControllerException('Error loading state: $e');
+      }
+    }
+  }
+
+  clearState() async {
+    prefs?.remove("values");
+    values.clear();
+    notifyListeners();
+  }
+
+  _init() async {
+    prefs ??= await SharedPreferences.getInstance();
+    loadState();
+  }
+}
+
+class MeasureControllerException implements Exception {
+  final String message;
+
+  const MeasureControllerException(this.message);
+
+  @override
+  String toString() => message;
 }
