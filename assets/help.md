@@ -13,7 +13,7 @@ Run the app and select sequence from dropdown menu.
 
 ***For example:***
 >*PS_ME_stem_rotator_dcab*
->> will select cylinder according firing sequence of PS Main Engine
+>> will select cylinder according firing sequence of PS Main Engine 
 >> (A1-B1-A5-B5-A3-B3-A6-B6-A2-B2-A4-B4)
 >> select inputs for stem and rotator for each valve in order  D,C,A,B
 

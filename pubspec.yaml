@@ -2,7 +2,7 @@ name: valve_heights_app
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.6+1
+version: 1.0.7+1
 
 environment:
   sdk: ^3.8.0
@@ -19,6 +19,7 @@ dependencies:
   permission_handler: ^12.0.0+1
   build_runner: ^2.5.4
   intl: ^0.20.2
+  markdown_widget: ^2.3.2+8
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +29,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/template.xlsx
+    - assets/help.md
+    - assets/panel.png
     - assets/configs/PS_ME_abcd_stem_rotator.json
     - assets/configs/PS_ME_dcab_stem_rotator.json
     - assets/configs/PS_ME_stem_rotator_abcd.json

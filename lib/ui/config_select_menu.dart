@@ -39,22 +39,21 @@ class _ConfigSelectMenuState extends State<ConfigSelectMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: _selectedFile,
-        icon: const Icon(Icons.arrow_drop_down),
-        iconSize: 24,
-        elevation: 16,
-        style: const TextStyle(color: Colors.deepPurple, fontSize: 16),
-        onChanged: (String? newValue) {
-          if (newValue == null) return;
-          _selectedFile = newValue;
-          widget.onConfigSelected("$newValue.json");
-          setState(() {});
-        },
-        items: _configs.map<DropdownMenuItem<String>>((String file) {
-          return DropdownMenuItem<String>(value: file, child: Text(file));
-        }).toList(),
+    return FittedBox(
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedFile,
+          style: const TextStyle(color: Colors.deepPurple, fontSize: 16),
+          onChanged: (String? newValue) {
+            if (newValue == null) return;
+            _selectedFile = newValue;
+            widget.onConfigSelected("$newValue.json");
+            setState(() {});
+          },
+          items: _configs.map<DropdownMenuItem<String>>((String file) {
+            return DropdownMenuItem<String>(value: file, child: Text(file));
+          }).toList(),
+        ),
       ),
     );
   }

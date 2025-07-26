@@ -4,6 +4,7 @@ import 'package:file_provider/file_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:valve_heights_app/domain/measure_controller.dart';
 import 'package:valve_heights_app/ui/config_select_menu.dart';
+import 'package:valve_heights_app/ui/help_widget.dart';
 import 'package:valve_heights_app/ui/valve_heights_input_widget.dart';
 
 class MainScreen extends StatefulWidget {
@@ -94,6 +95,15 @@ class _MainScreenState extends State<MainScreen> {
                   : Icons.keyboard_alt,
             ),
             onPressed: () => controller.toggleShowKeyboard(),
+          ),
+          IconButton(
+            icon: Icon(Icons.info),
+            tooltip: "About",
+            onPressed: () => showAboutDialog(
+              context: context,
+              applicationName: "Valve Heights App",
+              children: [HelpWidget()],
+            ),
           ),
         ],
       ),

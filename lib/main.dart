@@ -48,10 +48,15 @@ class MyApp extends StatelessWidget {
   Future<String> init() async {
     final prefs = await SharedPreferences.getInstance();
     String? pathConfigs = prefs.getString('pathConfigs');
-    pathConfigs ??= await setupConfigDirectory(pathConfigs, prefs);
+    if (pathConfigs != null && Directory(pathConfigs).existsSync()) {
+      return pathConfigs;
+    }
+
+    pathConfigs = await setupConfigDirectory(pathConfigs, prefs);
     if (pathConfigs == null) {
       throw Exception('Could not setup config directory');
     }
+
     return pathConfigs;
   }
 
@@ -64,7 +69,7 @@ class MyApp extends StatelessWidget {
     }
     if (Platform.isWindows || Platform.isLinux) {
       final docDir = await getApplicationDocumentsDirectory();
-      pathConfigs = p.join(docDir.path, 'valve_heights_app', 'configs');
+      pathConfigs = p.join(docDir.path, 'valve_heights_app');
     }
     final directory = Directory(pathConfigs!);
     if (!directory.existsSync()) {
